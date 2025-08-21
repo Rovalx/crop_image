@@ -44,11 +44,6 @@ class CropImage extends StatefulWidget {
   /// Defaults to 0.
   final double paddingSize;
 
-  /// The size of the touch area.
-  ///
-  /// Defaults to 50.
-  final double touchSize;
-
   /// The size of the corner of the crop grid.
   ///
   /// Defaults to 25.
@@ -124,7 +119,6 @@ class CropImage extends StatefulWidget {
     Color? gridInnerColor,
     Color? gridCornerColor,
     this.paddingSize = 0,
-    this.touchSize = 50,
     this.gridCornerSize = 25,
     this.showCorners = true,
     this.gridThinWidth = 2,
@@ -140,11 +134,11 @@ class CropImage extends StatefulWidget {
   })  : gridInnerColor = gridInnerColor ?? gridColor,
         gridCornerColor = gridCornerColor ?? gridColor,
         assert(gridCornerSize > 0, 'gridCornerSize cannot be zero'),
-        assert(touchSize > 0, 'touchSize cannot be zero'),
         assert(gridThinWidth > 0, 'gridThinWidth cannot be zero'),
         assert(gridThickWidth > 0, 'gridThickWidth cannot be zero'),
         assert(minimumImageSize > 0, 'minimumImageSize cannot be zero'),
-        assert(maximumImageSize >= minimumImageSize, 'maximumImageSize cannot be less than minimumImageSize');
+        assert(maximumImageSize >= minimumImageSize,
+            'maximumImageSize cannot be less than minimumImageSize');
 
   @override
   State<CropImage> createState() => _CropImageState();
@@ -153,22 +147,30 @@ class CropImage extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
 
-    properties.add(DiagnosticsProperty<CropController>('controller', controller, defaultValue: null));
+    properties.add(DiagnosticsProperty<CropController>('controller', controller,
+        defaultValue: null));
     properties.add(DiagnosticsProperty<Image>('image', image));
     properties.add(DiagnosticsProperty<Color>('gridColor', gridColor));
-    properties.add(DiagnosticsProperty<Color>('gridInnerColor', gridInnerColor));
-    properties.add(DiagnosticsProperty<Color>('gridCornerColor', gridCornerColor));
+    properties
+        .add(DiagnosticsProperty<Color>('gridInnerColor', gridInnerColor));
+    properties
+        .add(DiagnosticsProperty<Color>('gridCornerColor', gridCornerColor));
     properties.add(DiagnosticsProperty<double>('paddingSize', paddingSize));
-    properties.add(DiagnosticsProperty<double>('touchSize', touchSize));
-    properties.add(DiagnosticsProperty<double>('gridCornerSize', gridCornerSize));
+    properties
+        .add(DiagnosticsProperty<double>('gridCornerSize', gridCornerSize));
     properties.add(DiagnosticsProperty<bool>('showCorners', showCorners));
     properties.add(DiagnosticsProperty<double>('gridThinWidth', gridThinWidth));
-    properties.add(DiagnosticsProperty<double>('gridThickWidth', gridThickWidth));
+    properties
+        .add(DiagnosticsProperty<double>('gridThickWidth', gridThickWidth));
     properties.add(DiagnosticsProperty<Color>('scrimColor', scrimColor));
-    properties.add(DiagnosticsProperty<bool>('alwaysShowThirdLines', alwaysShowThirdLines));
-    properties.add(DiagnosticsProperty<ValueChanged<Rect>>('onCrop', onCrop, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('minimumImageSize', minimumImageSize));
-    properties.add(DiagnosticsProperty<double>('maximumImageSize', maximumImageSize));
+    properties.add(DiagnosticsProperty<bool>(
+        'alwaysShowThirdLines', alwaysShowThirdLines));
+    properties.add(DiagnosticsProperty<ValueChanged<Rect>>('onCrop', onCrop,
+        defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<double>('minimumImageSize', minimumImageSize));
+    properties
+        .add(DiagnosticsProperty<double>('maximumImageSize', maximumImageSize));
     properties.add(DiagnosticsProperty<bool>('alwaysMove', alwaysMove));
   }
 }
@@ -184,10 +186,18 @@ class _CropImageState extends State<CropImage> {
   _TouchPoint? panStart;
 
   Map<_CornerTypes, Offset> get gridCorners => <_CornerTypes, Offset>{
-        _CornerTypes.UpperLeft: controller.crop.topLeft.scale(size.width, size.height).translate(widget.paddingSize, widget.paddingSize),
-        _CornerTypes.UpperRight: controller.crop.topRight.scale(size.width, size.height).translate(widget.paddingSize, widget.paddingSize),
-        _CornerTypes.LowerRight: controller.crop.bottomRight.scale(size.width, size.height).translate(widget.paddingSize, widget.paddingSize),
-        _CornerTypes.LowerLeft: controller.crop.bottomLeft.scale(size.width, size.height).translate(widget.paddingSize, widget.paddingSize),
+        _CornerTypes.UpperLeft: controller.crop.topLeft
+            .scale(size.width, size.height)
+            .translate(widget.paddingSize, widget.paddingSize),
+        _CornerTypes.UpperRight: controller.crop.topRight
+            .scale(size.width, size.height)
+            .translate(widget.paddingSize, widget.paddingSize),
+        _CornerTypes.LowerRight: controller.crop.bottomRight
+            .scale(size.width, size.height)
+            .translate(widget.paddingSize, widget.paddingSize),
+        _CornerTypes.LowerLeft: controller.crop.bottomLeft
+            .scale(size.width, size.height)
+            .translate(widget.paddingSize, widget.paddingSize),
       };
 
   @override
@@ -199,7 +209,8 @@ class _CropImageState extends State<CropImage> {
     currentCrop = controller.crop;
 
     _stream = widget.image.image.resolve(const ImageConfiguration());
-    _streamListener = ImageStreamListener((info, _) => controller.image = info.image);
+    _streamListener =
+        ImageStreamListener((info, _) => controller.image = info.image);
     _stream.addListener(_streamListener);
   }
 
@@ -227,7 +238,8 @@ class _CropImageState extends State<CropImage> {
     }
   }
 
-  double _getImageRatio(final double maxWidth, final double maxHeight) => controller.getImage()!.width / controller.getImage()!.height;
+  double _getImageRatio(final double maxWidth, final double maxHeight) =>
+      controller.getImage()!.width / controller.getImage()!.height;
 
   double _getWidth(final double maxWidth, final double maxHeight) {
     double imageRatio = _getImageRatio(maxWidth, maxHeight);
@@ -261,12 +273,15 @@ class _CropImageState extends State<CropImage> {
               return widget.loadingPlaceholder;
             }
             // we remove the borders
-            final double maxWidth = constraints.maxWidth - 2 * widget.paddingSize;
-            final double maxHeight = constraints.maxHeight - 2 * widget.paddingSize;
+            final double maxWidth =
+                constraints.maxWidth - 2 * widget.paddingSize;
+            final double maxHeight =
+                constraints.maxHeight - 2 * widget.paddingSize;
             final double width = _getWidth(maxWidth, maxHeight);
             final double height = _getHeight(maxWidth, maxHeight);
             size = Size(width, height);
-            final bool showCorners = widget.showCorners && widget.minimumImageSize != widget.maximumImageSize;
+            final bool showCorners = widget.showCorners &&
+                widget.minimumImageSize != widget.maximumImageSize;
             return Stack(
               alignment: Alignment.center,
               children: <Widget>[
@@ -322,7 +337,8 @@ class _CropImageState extends State<CropImage> {
     if (panStart == null) {
       final type = hitTest(details.localPosition);
       if (type != _CornerTypes.None) {
-        var basePoint = gridCorners[(type == _CornerTypes.Move) ? _CornerTypes.UpperLeft : type]!;
+        var basePoint = gridCorners[
+            (type == _CornerTypes.Move) ? _CornerTypes.UpperLeft : type]!;
         setState(() {
           panStart = _TouchPoint(type, details.localPosition - basePoint);
         });
@@ -332,7 +348,9 @@ class _CropImageState extends State<CropImage> {
 
   void onPanUpdate(DragUpdateDetails details) {
     if (panStart != null) {
-      final offset = details.localPosition - panStart!.offset - Offset(widget.paddingSize, widget.paddingSize);
+      final offset = details.localPosition -
+          panStart!.offset -
+          Offset(widget.paddingSize, widget.paddingSize);
       if (panStart!.type == _CornerTypes.Move) {
         moveArea(offset);
       } else {
@@ -355,8 +373,16 @@ class _CropImageState extends State<CropImage> {
   }
 
   _CornerTypes hitTest(Offset point) {
+    final height = gridCorners[_CornerTypes.LowerRight]!.dy -
+        gridCorners[_CornerTypes.UpperRight]!.dy;
+    final width = gridCorners[_CornerTypes.UpperRight]!.dx -
+        gridCorners[_CornerTypes.UpperLeft]!.dx;
+    final touchHeight = height / 2;
+    final touchWidth = width / 2;
+
     for (final gridCorner in gridCorners.entries) {
-      final area = Rect.fromCenter(center: gridCorner.value, width: widget.touchSize, height: widget.touchSize);
+      final area = Rect.fromCenter(
+          center: gridCorner.value, width: touchWidth, height: touchHeight);
       if (area.contains(point)) {
         return gridCorner.key;
       }
@@ -366,7 +392,8 @@ class _CropImageState extends State<CropImage> {
       return _CornerTypes.Move;
     }
 
-    final area = Rect.fromPoints(gridCorners[_CornerTypes.UpperLeft]!, gridCorners[_CornerTypes.LowerRight]!);
+    final area = Rect.fromPoints(gridCorners[_CornerTypes.UpperLeft]!,
+        gridCorners[_CornerTypes.LowerRight]!);
     return area.contains(point) ? _CornerTypes.Move : _CornerTypes.None;
   }
 
